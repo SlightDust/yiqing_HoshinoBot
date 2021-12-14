@@ -1,0 +1,2 @@
+# yiqing_HoshinoBot
+一个适用于HoshinoBot的新冠肺炎疫情获取插件
