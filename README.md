@@ -19,6 +19,7 @@ MODULES_ON = {
 
 # 日志
 2021/12/14  代码写的很烂，但是能跑就行。  
+2022/01/11  ~~用很多try except~~修复无法获取数据的问题。今天腾讯悄悄改了api响应，导致插件炸了。~~腾讯你坏事做尽~~  
 
-# 鸣谢
-[腾讯疫情Api](https://view.inews.qq.com/g2/getOnsInfo?name=disease_h5)
+# 免责声明
+数据来源：[腾讯疫情Api](https://view.inews.qq.com/g2/getOnsInfo?name=disease_h5)

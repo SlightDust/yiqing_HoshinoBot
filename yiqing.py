@@ -43,7 +43,10 @@ async def get_yiqing_data(area: str) -> str:
         data.pop("areaTree")
         msg += f"中国（含港澳台）疫情：\r\n"
         msg += f"现存确诊{data['chinaTotal']['nowConfirm']}(+{data['chinaAdd']['confirm']})\r\n"
-        msg += f"现存疑似{data['chinaTotal']['suspect']}(+{data['chinaAdd']['suspect']})\r\n"
+        try:
+            msg += f"现存疑似{data['chinaTotal']['suspect']}(+{data['chinaAdd']['suspect']})\r\n"
+        except:
+            msg += "无法获取疑似病例数据\r\n"
         msg += f"累计确诊{data['chinaTotal']['confirm']}\r\n"
         msg += f"累计治愈{data['chinaTotal']['heal']}\r\n"
         msg += f"累计死亡{data['chinaTotal']['dead']}\r\n"
@@ -77,18 +80,28 @@ async def get_yiqing_data(area: str) -> str:
     msg += f"{result['name']}{type_}疫情：\r\n"
     msg += f"现存确诊：{result['total']['nowConfirm']}" + (f"(+{result['today']['confirm']})" if result['today']['confirm'] > 0 else "")
     msg += "\r\n"
-    msg += f"现存疑似：{result['total']['suspect']}\r\n"
+    try:
+        msg += f"现存疑似：{result['total']['suspect']}\r\n"
+    except:
+        msg += f"无法获取疑似病例数据\r\n"
     msg += f"累计确诊：{result['total']['confirm']}\r\n"
-    msg += f"累计死亡：{result['total']['dead']}({result['total']['deadRate']}%)\r\n"
-    msg += f"累计治愈：{result['total']['heal']}({result['total']['healRate']}%)\r\n"
+    try:
+        msg += f"累计死亡：{result['total']['dead']} ({result['total']['deadRate']}%)\r\n"
+    except:
+        msg += f"累计死亡：{result['total']['dead']} ({(result['total']['dead']/result['total']['confirm']*100):.2f}%)\r\n"
+    try:
+        msg += f"累计治愈：{result['total']['heal']} ({result['total']['healRate']}%)\r\n"
+    except:
+        msg += f"累计治愈：{result['total']['heal']} ({(result['total']['heal']/result['total']['confirm']*100):.2f}%)\r\n"
     try:
         msg += f"风险等级：{result['total']['grade']}\r\n" if type_ == "(市)" else ""
     except:
-        msg += "风险等级信息获取失败\r\n"
-    msg += f"当前地区信息今日已更新\r\n最后更新时间：\r\n{data['lastUpdateTime']}\r\n" if result['today']['isUpdated'] else "！当前地区信息今日无更新\r\n"
+        msg += "无法获取风险等级信息\r\n"
+    msg += f"当前地区信息今日已更新\r\n最后更新时间：\r\n{data['lastUpdateTime']}" if result['today']['isUpdated'] else "！当前地区信息今日无更新"
     return msg
     
 @sv.on_suffix("疫情")
+@sv.on_prefix("疫情")
 async def yiqing(bot,ev):
     #冷却器检查
     if not flmt.check(ev['user_id']):
