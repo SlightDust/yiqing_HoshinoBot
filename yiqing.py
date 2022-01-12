@@ -1,9 +1,13 @@
 import json
-
+from sys import path_importer_cache
 import hoshino
 from hoshino import Service,priv
 from hoshino import aiorequests
 from hoshino.util import FreqLimiter
+from PIL import Image,ImageDraw, ImageFont
+import io
+import base64
+
 
 flmt = FreqLimiter(5)
 url = "https://view.inews.qq.com/g2/getOnsInfo?name=disease_h5"  # 腾讯api
@@ -41,15 +45,15 @@ async def get_yiqing_data(area: str) -> str:
     # 先最特殊情况
     if area == "中国":
         data.pop("areaTree")
-        msg += f"中国（含港澳台）疫情：\r\n"
-        msg += f"现存确诊{data['chinaTotal']['nowConfirm']}(+{data['chinaAdd']['confirm']})\r\n"
+        msg += f"中国（含港澳台）疫情：\n"
+        msg += f"现存确诊{data['chinaTotal']['nowConfirm']}(+{data['chinaAdd']['confirm']})\n"
         try:
-            msg += f"现存疑似{data['chinaTotal']['suspect']}(+{data['chinaAdd']['suspect']})\r\n"
+            msg += f"现存疑似{data['chinaTotal']['suspect']}(+{data['chinaAdd']['suspect']})\n"
         except:
-            msg += "无法获取疑似病例数据\r\n"
-        msg += f"累计确诊{data['chinaTotal']['confirm']}\r\n"
-        msg += f"累计治愈{data['chinaTotal']['heal']}\r\n"
-        msg += f"累计死亡{data['chinaTotal']['dead']}\r\n"
+            msg += "无法获取疑似病例数据\n"
+        msg += f"累计确诊{data['chinaTotal']['confirm']}\n"
+        msg += f"累计治愈{data['chinaTotal']['heal']}\n"
+        msg += f"累计死亡{data['chinaTotal']['dead']}\n"
         return msg
     else:
         # 移除“市”
@@ -77,29 +81,42 @@ async def get_yiqing_data(area: str) -> str:
                     if city['name'] == area:
                         result = city
                         type_ = "(市)"
-    msg += f"{result['name']}{type_}疫情：\r\n"
+    msg += f"{result['name']}{type_}疫情：\n"
     msg += f"现存确诊：{result['total']['nowConfirm']}" + (f"(+{result['today']['confirm']})" if result['today']['confirm'] > 0 else "")
-    msg += "\r\n"
+    msg += "\n"
     try:
-        msg += f"现存疑似：{result['total']['suspect']}\r\n"
+        msg += f"现存疑似：{result['total']['suspect']}\n"
     except:
-        msg += f"无法获取疑似病例数据\r\n"
-    msg += f"累计确诊：{result['total']['confirm']}\r\n"
+        msg += f"无法获取疑似病例数据\n"
+    msg += f"累计确诊：{result['total']['confirm']}\n"
     try:
-        msg += f"累计死亡：{result['total']['dead']} ({result['total']['deadRate']}%)\r\n"
+        msg += f"累计死亡：{result['total']['dead']} ({result['total']['deadRate']}%)\n"
     except:
-        msg += f"累计死亡：{result['total']['dead']} ({(result['total']['dead']/result['total']['confirm']*100):.2f}%)\r\n"
+        msg += f"累计死亡：{result['total']['dead']} ({(result['total']['dead']/result['total']['confirm']*100):.2f}%)\n"
     try:
-        msg += f"累计治愈：{result['total']['heal']} ({result['total']['healRate']}%)\r\n"
+        msg += f"累计治愈：{result['total']['heal']} ({result['total']['healRate']}%)\n"
     except:
-        msg += f"累计治愈：{result['total']['heal']} ({(result['total']['heal']/result['total']['confirm']*100):.2f}%)\r\n"
+        msg += f"累计治愈：{result['total']['heal']} ({(result['total']['heal']/result['total']['confirm']*100):.2f}%)\n"
     try:
-        msg += f"风险等级：{result['total']['grade']}\r\n" if type_ == "(市)" else ""
+        msg += f"风险等级：{result['total']['grade']}\n" if type_ == "(市)" else ""
     except:
-        msg += "无法获取风险等级信息\r\n"
-    msg += f"当前地区信息今日已更新\r\n最后更新时间：\r\n{data['lastUpdateTime']}" if result['today']['isUpdated'] else "！当前地区信息今日无更新"
+        msg += "无法获取风险等级信息\n"
+    msg += f"当前地区信息今日已更新\n最后更新时间：\n{data['lastUpdateTime']}" if result['today']['isUpdated'] else "！当前地区信息今日无更新"
     return msg
-    
+
+
+
+def image_draw(msg):
+
+    img = Image.new("RGB",(200,200),(255,255,255))
+    draw = ImageDraw.Draw(img)
+    font1 = ImageFont.truetype('simhei.ttf', 16)
+    draw.text((0, 0), msg, fill=(0, 0, 0), font=font1)
+    b_io = io.BytesIO()
+    img.save(b_io, format = "JPEG")
+    base64_str = 'base64://' + base64.b64encode(b_io.getvalue()).decode()
+    return base64_str
+
 @sv.on_suffix("疫情")
 @sv.on_prefix("疫情")
 async def yiqing(bot,ev):
@@ -117,7 +134,11 @@ async def yiqing(bot,ev):
         else:
             msg = f"查询{area}数据失败：{e}"
         flmt.start_cd(ev['user_id'],3)
-    await bot.send(ev,msg)
+    if len(msg)<30:
+        await bot.send(ev,msg)
+    else:
+        pic = image_draw(msg)
+        await bot.send(ev, f'[CQ:image,file={pic}]')
 
 @sv.on_fullmatch('疫情帮助')
 async def yiqing_help(bot,ev):
