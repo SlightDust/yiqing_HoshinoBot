@@ -6,6 +6,7 @@ from hoshino import aiorequests
 from hoshino.util import FreqLimiter
 from PIL import Image,ImageDraw, ImageFont
 import io
+import os
 import base64
 
 
@@ -107,10 +108,10 @@ async def get_yiqing_data(area: str) -> str:
 
 
 def image_draw(msg):
-
+    fontpath = font_path = os.path.join(os.path.dirname(__file__), 'simhei.ttf')
     img = Image.new("RGB",(200,200),(255,255,255))
     draw = ImageDraw.Draw(img)
-    font1 = ImageFont.truetype('simhei.ttf', 16)
+    font1 = ImageFont.truetype(fontpath, 16)
     draw.text((0, 0), msg, fill=(0, 0, 0), font=font1)
     b_io = io.BytesIO()
     img.save(b_io, format = "JPEG")
