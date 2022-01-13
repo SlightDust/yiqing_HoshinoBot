@@ -109,7 +109,7 @@ async def get_yiqing_data(area: str) -> str:
 
 def image_draw(msg):
     fontpath = font_path = os.path.join(os.path.dirname(__file__), 'simhei.ttf')
-    img = Image.new("RGB",(210,180),(255,255,255))
+    img = Image.new("RGB",(210,200),(255,255,255))
     draw = ImageDraw.Draw(img)
     font1 = ImageFont.truetype(fontpath, 16)
     draw.text((10, 10), msg, fill=(0, 0, 0), font=font1)
