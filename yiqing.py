@@ -113,30 +113,31 @@ async def get_yiqing_data(area: str) -> str:
         msg += "无法获取风险等级信息\n"
     msg += f"当前地区信息今日已更新\n最后更新时间：\n{data['lastUpdateTime']}\n" if result['today']['isUpdated'] else "！当前地区信息今日无更新\n"
 
-    url_risk_area = "https://wechat.wecity.qq.com/api/PneumoniaTravelNoAuth/queryAllRiskLevel"
-    payload_json = {"args": {"req": {}}, "service": "PneumoniaTravelNoAuth", "func": "queryAllRiskLevel",
-                    "context": {"userId": "a"}}
-    risk_area_data = await aiorequests.post(url=url_risk_area, json=payload_json)
-    risk_area_data = await risk_area_data.json()
-    risk_area_data = risk_area_data['args']['rsp']
-    mediumRiskAreaList = risk_area_data['mediumRiskAreaList']
-    highRiskAreaList = risk_area_data['highRiskAreaList']
-
-    if "风险等级：" not in msg: # 没有获取到风险等级
+    if ("风险等级：" not in msg) and (type_ in ["(省)","(特别行政区)"]):  # 没有获取到风险等级
         return msg
 
-    msg += '中风险地区：\n'
-    for i in mediumRiskAreaList:
-        for j in i['list']:
-            if j['cityName'] in [area, area + "市"]:
-                msg += f"  {j['areaName']} {j['communityName']}\n"
-    msg += '高风险地区：\n'
-    for i in highRiskAreaList:
-        for j in i['list']:
-            if j['cityName'] in [area, area + "市"]:
-                msg += f"  {j['areaName']} {j['communityName']}\n"
-
-    return msg
+    try:  # 不知道稳不稳，先用try包一下
+        url_risk_area = "https://wechat.wecity.qq.com/api/PneumoniaTravelNoAuth/queryAllRiskLevel"
+        payload_json = {"args": {"req": {}}, "service": "PneumoniaTravelNoAuth", "func": "queryAllRiskLevel",
+                        "context": {"userId": "a"}}
+        risk_area_data = await aiorequests.post(url=url_risk_area, json=payload_json)
+        risk_area_data = await risk_area_data.json()
+        risk_area_data = risk_area_data['args']['rsp']
+        mediumRiskAreaList = risk_area_data['mediumRiskAreaList']
+        highRiskAreaList = risk_area_data['highRiskAreaList']
+        msg += '中风险地区：\n'
+        for i in mediumRiskAreaList:
+            for j in i['list']:
+                if j['cityName'] in [area, area + "市"]:
+                    msg += f"  {j['areaName']} {j['communityName']}\n"
+        msg += '高风险地区：\n'
+        for i in highRiskAreaList:
+            for j in i['list']:
+                if j['cityName'] in [area, area + "市"]:
+                    msg += f"  {j['areaName']} {j['communityName']}\n"
+        return msg
+    except:
+        return msg
 
 
 def image_draw(msg):
