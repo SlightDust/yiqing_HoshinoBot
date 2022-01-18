@@ -125,16 +125,31 @@ async def get_yiqing_data(area: str) -> str:
         risk_area_data = risk_area_data['args']['rsp']
         mediumRiskAreaList = risk_area_data['mediumRiskAreaList']
         highRiskAreaList = risk_area_data['highRiskAreaList']
-        msg += '中风险地区：\n'
+        
+        msg += '\n中风险地区：\n'
+        mid_risk_msg = ''
         for i in mediumRiskAreaList:
             for j in i['list']:
                 if j['cityName'] in [area, area + "市"]:
-                    msg += f"  {j['areaName']} {j['communityName']}\n"
+                    mid_risk_msg += f"  {j['areaName']} {j['communityName']}\n"
+        if len(mid_risk_msg) > 0:
+            mid_risk_msg = mid_risk_msg.replace('、', '\n  ')
+            msg += mid_risk_msg + '\n'
+        else:
+            msg += '  N/A\n'
+
         msg += '高风险地区：\n'
+        high_risk_msg = ''
         for i in highRiskAreaList:
             for j in i['list']:
                 if j['cityName'] in [area, area + "市"]:
-                    msg += f"  {j['areaName']} {j['communityName']}\n"
+                    high_risk_msg += f"  {j['areaName']} {j['communityName']}\n"
+        if len(high_risk_msg) > 0:
+            high_risk_msg = high_risk_msg.replace('、', '\n  ')
+            msg += high_risk_msg + '\n'
+        else:
+            msg += '  N/A\n'
+            
         return msg
     except:
         return msg
