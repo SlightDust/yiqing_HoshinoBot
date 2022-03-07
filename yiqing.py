@@ -132,6 +132,11 @@ async def get_yiqing_data(area: str) -> str:
         mediumRiskAreaList = risk_area_data['mediumRiskAreaList']
         highRiskAreaList = risk_area_data['highRiskAreaList']
         
+        
+        # （吉林市上面没移除“市”）
+        if area[-1] == "市":
+            area = area[0:-1]
+        
         msg += '\n中风险地区：\n'
         mid_risk_msg = ''
         for i in mediumRiskAreaList:
