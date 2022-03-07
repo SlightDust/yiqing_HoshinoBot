@@ -60,19 +60,25 @@ async def get_yiqing_data(area: str) -> str:
         msg += f"累计治愈{data['chinaTotal']['heal']}\n"
         msg += f"累计死亡{data['chinaTotal']['dead']}\n"
         return msg
+    elif area == "吉林市":
+        for province in all_province:
+            if province['name'] == "吉林":
+                for city in province['children']:
+                    if city['name'] == "吉林":
+                        result = city
+                        type_ = "(市)"
     else:
         # 移除“市”
         if area[-1] == "市":
             area = area[0:-1]
         # 先找省
         if area[-1] == "省":
+            # 针对指定为省份的查询
             for province in all_province:
                 if province['name'] == area[0:-1]:
                     province.pop('children')
                     result = province
                     type_ = "(省)"
-            # 针对指定为省份的查询
-            pass
         else:
             # 不会优化，两个for嗯找，能跑就行
             for province in all_province:
