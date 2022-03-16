@@ -48,7 +48,7 @@ async def get_yiqing_data(area: str) -> str:
     all_province = tree[0]['children']
 
     # 先最特殊情况
-    if area == "中国":
+    if area in ("中国","全国","国内"):
         data.pop("areaTree")
         msg += f"中国（含港澳台）疫情：\n"
         msg += f"现存确诊{data['chinaTotal']['nowConfirm']}(+{data['chinaAdd']['confirm']})\n"
