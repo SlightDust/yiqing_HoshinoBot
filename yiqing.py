@@ -103,7 +103,14 @@ async def get_yiqing_data(area: str) -> str:
     try:
         msg += f"现存疑似：{result['total']['suspect']}\n"
     except:
-        msg += f"无法获取疑似病例数据\n"
+        pass
+    if type_ != "(市)": # api里新增了wzz和wzz_add字段，但是二级行政区恒为0
+        try:
+            msg += f"现存无症状：{result['total']['wzz']}" +(
+                f"(+{result['today']['wzz_add']})" if result['today']['wzz_add'] > 0 else "")
+            msg += "\n"
+        except:
+            pass
     msg += f"累计确诊：{result['total']['confirm']}\n"
     try:
         msg += f"累计死亡：{result['total']['dead']} ({result['total']['deadRate']}%)\n"
@@ -113,13 +120,13 @@ async def get_yiqing_data(area: str) -> str:
         msg += f"累计治愈：{result['total']['heal']} ({result['total']['healRate']}%)\n"
     except:
         msg += f"累计治愈：{result['total']['heal']} ({(result['total']['heal'] / result['total']['confirm'] * 100):.2f}%)\n"
-    try:
-        msg += f"风险等级：{result['total']['grade']}\n" if type_ == "(市)" else ""
-    except:
-        msg += "无法获取风险等级信息\n"
+    # try:  变成了“点击查看详情，所以没必要显示了”
+    #     msg += f"风险等级：{result['total']['grade']}\n" if type_ == "(市)" else ""
+    # except:
+    #     msg += "无法获取风险等级信息\n"
     msg += f"当前地区信息今日已更新\n最后更新时间：\n{data['lastUpdateTime']}\n" if result['today']['isUpdated'] else "！当前地区信息今日无更新\n"
 
-    if ("风险等级：" not in msg) and (type_ in ["(省)","(特别行政区)"]):  # 没有获取到风险等级
+    if type_ in ["(省)","(特别行政区)"]:  # 没有获取到风险等级
         return msg
 
     try:  # 不知道稳不稳，先用try包一下
