@@ -48,14 +48,15 @@ async def get_yiqing_data(area: str) -> str:
     all_province = tree[0]['children']
 
     # 先最特殊情况
-    if area in ("中国","全国","国内"):
+    if area in ("中国", "全国", "国内"):
         data.pop("areaTree")
-        msg += f"中国（含港澳台）疫情：\n"
-        msg += f"现存确诊{data['chinaTotal']['nowConfirm']}(+{data['chinaAdd']['confirm']})\n"
-        try:
-            msg += f"现存疑似{data['chinaTotal']['suspect']}(+{data['chinaAdd']['suspect']})\n"
-        except:
-            msg += "无法获取疑似病例数据\n"
+        msg += f"中国疫情：\n"
+        msg += f"现存确诊（含港澳台）{data['chinaTotal']['nowConfirm']}(+{data['chinaAdd']['confirm']})\n"
+        msg += f"现存无症状{data['chinaTotal']['noInfect']}(+{data['chinaAdd']['noInfect']})\n"
+        msg += f"境内现存确诊{data['chinaTotal']['localConfirmH5']}(" \
+               + ("+" if data['chinaAdd']['localConfirmH5'] > 0 else "") \
+               + f"{data['chinaAdd']['localConfirmH5']})"  # localConfirm和localConfirmH5不一样，页面显示的是H5
+        msg += "\n"
         msg += f"累计确诊{data['chinaTotal']['confirm']}\n"
         msg += f"累计治愈{data['chinaTotal']['heal']}\n"
         msg += f"累计死亡{data['chinaTotal']['dead']}\n"
@@ -100,10 +101,6 @@ async def get_yiqing_data(area: str) -> str:
     msg += f"现存确诊：{result['total']['nowConfirm']}" + (
         f"(+{result['today']['confirm']})" if result['today']['confirm'] > 0 else "")
     msg += "\n"
-    try:
-        msg += f"现存疑似：{result['total']['suspect']}\n"
-    except:
-        pass
     if type_ != "(市)": # api里新增了wzz和wzz_add字段，但是二级行政区恒为0
         try:
             msg += f"现存无症状：{result['total']['wzz']}" +(
@@ -120,10 +117,6 @@ async def get_yiqing_data(area: str) -> str:
         msg += f"累计治愈：{result['total']['heal']} ({result['total']['healRate']}%)\n"
     except:
         msg += f"累计治愈：{result['total']['heal']} ({(result['total']['heal'] / result['total']['confirm'] * 100):.2f}%)\n"
-    # try:  变成了“点击查看详情，所以没必要显示了”
-    #     msg += f"风险等级：{result['total']['grade']}\n" if type_ == "(市)" else ""
-    # except:
-    #     msg += "无法获取风险等级信息\n"
     msg += f"当前地区信息今日已更新\n最后更新时间：\n{data['lastUpdateTime']}\n" if result['today']['isUpdated'] else "！当前地区信息今日无更新\n"
 
     if type_ in ["(省)","(特别行政区)"]:  # 没有获取到风险等级
