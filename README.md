@@ -32,5 +32,5 @@ MODULES_ON = {
 # 免责声明
 数据来源：  
 [腾讯疫情Api（原）](https://view.inews.qq.com/g2/getOnsInfo?name=disease_h5)  
-[腾讯疫情Api（新）](https://api.inews.qq.com/newsqa/v1/query/inner/publish/modules/list?modules=statisGradeCityDetail,diseaseh5Shelf)
+[腾讯疫情Api（新）](https://api.inews.qq.com/newsqa/v1/query/inner/publish/modules/list?modules=statisGradeCityDetail,diseaseh5Shelf)  
 [风险等级Api（post）](https://wechat.wecity.qq.com/api/PneumoniaTravelNoAuth/queryAllRiskLevel)
