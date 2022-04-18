@@ -10,7 +10,7 @@ import os
 import base64
 
 flmt = FreqLimiter(5)
-url = "https://view.inews.qq.com/g2/getOnsInfo?name=disease_h5"  # 腾讯api
+url = "https://api.inews.qq.com/newsqa/v1/query/inner/publish/modules/list?modules=statisGradeCityDetail,diseaseh5Shelf"  # 腾讯api
 
 sv = Service(
     name='疫情数据',  # 功能名
@@ -39,11 +39,11 @@ async def get_yiqing_data(area: str) -> str:
     type_ = ""  # 标记是省还是市
     result = {}
     msg = ""
-    raw_data = await aiorequests.get(url=url)
+    raw_data = await aiorequests.post(url=url)
     raw_data = await raw_data.json()
     if raw_data['ret'] != 0:
         print('ret不为0，疑似有问题')
-    data = json.loads(raw_data['data'])
+    data = raw_data['data']['diseaseh5Shelf']
     tree = data['areaTree']
     all_province = tree[0]['children']
 
