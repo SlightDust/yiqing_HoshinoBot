@@ -189,6 +189,7 @@ async def yiqing(bot, ev):
     area = ev.message.extract_plain_text()
     try:
         msg = await get_yiqing_data(area)
+        msg += "\n免责声明：数据来源于腾讯"
         flmt.start_cd(ev['user_id'])
     except Exception as e:
         if str(e) == "'name'":
